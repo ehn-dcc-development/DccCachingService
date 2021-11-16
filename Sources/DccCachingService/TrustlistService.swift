@@ -102,4 +102,51 @@ class DefaultTrustlistService: SignedDataService<TrustList>, TrustlistService {
     func updateTrustlistIfNecessary(completionHandler: @escaping (ValidationError?) -> ()) {
         self.updateDataIfNecessary(force: true, completionHandler: completionHandler)
     }
+    
+    public func debugInformation(for keyId: Data, certType: CertType?, cwt: CWT?) -> [String: String] {
+        var errors = [ValidationError]()
+        if dataIsExpired() {
+            errors.append(.DATA_EXPIRED)
+        }
+        let entry = cachedData.entry(for: keyId)
+        if nil == entry {
+            errors.append(.KEY_NOT_IN_TRUST_LIST)
+        }
+        
+        if let entry = entry, !entry.isValid(for: dateService) {
+            errors.append(.PUBLIC_KEY_EXPIRED)
+        }
+        
+        if let entry = entry, let certType = certType, !entry.isSuitable(for: certType) {
+            errors.append(.UNSUITABLE_PUBLIC_KEY_TYPE)
+        }
+        
+        if let cwtIssuedAt = cwt?.issuedAt,
+           let cwtExpiresAt = cwt?.expiresAt,
+           let certNotBefore = entry?.notBefore,
+           let certNotAfter = entry?.notAfter {
+            
+            if certNotAfter.isAfter(dateService.now) {
+                errors.append(.PUBLIC_KEY_EXPIRED)
+            }
+            
+            if certNotBefore.isBefore(dateService.now) {
+                errors.append(.PUBLIC_KEY_NOT_YET_VALID)
+            }
+            
+            if cwtExpiresAt.isAfter(dateService.now) {
+                errors.append(.CWT_EXPIRED)
+            }
+            
+            if cwtIssuedAt.isBefore(dateService.now) {
+                errors.append(.CWT_NOT_YET_VALID)
+            }
+        }
+        
+        if nil == entry?.publicKey {
+            errors.append(.KEY_CREATION_ERROR)
+        }
+        return entry?.debugInformation ?? [:] //TODO add trustlist meta information and errors, create object as return value
+    }
+    
 }
