@@ -12,7 +12,7 @@ import Security
 import SwiftCBOR
 
 class SignedDataService<T: SignedData> {
-    private let dataUrl: String
+    let dataUrl: String
     private let signatureUrl: String
     private let apiKey: String?
     private let trustAnchor: String
@@ -201,10 +201,16 @@ class SignedDataService<T: SignedData> {
     }
     
     func dataIsExpired() -> Bool {
-        if dateService.isNowBefore(lastUpdate.addingTimeInterval(maximumAge)) {
+        if dateService.isNowBefore(expirationDate) {
             return false
         }
         return true
+    }
+    
+    public var expirationDate : Date {
+        get {
+            return lastUpdate.addingTimeInterval(maximumAge)
+        }
     }
 }
 

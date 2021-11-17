@@ -103,7 +103,7 @@ class DefaultTrustlistService: SignedDataService<TrustList>, TrustlistService {
         self.updateDataIfNecessary(force: true, completionHandler: completionHandler)
     }
     
-    public func debugInformation(for keyId: Data, certType: CertType?, cwt: CWT?) -> [String: String] {
+    public func debugInformation(for keyId: Data, certType: CertType?, cwt: CWT?) -> TrustlistDebugInfo {
         var errors = [ValidationError]()
         if dataIsExpired() {
             errors.append(.DATA_EXPIRED)
@@ -146,7 +146,8 @@ class DefaultTrustlistService: SignedDataService<TrustList>, TrustlistService {
         if nil == entry?.publicKey {
             errors.append(.KEY_CREATION_ERROR)
         }
-        return entry?.debugInformation ?? [:] //TODO add trustlist meta information and errors, create object as return value
+        
+        return TrustlistDebugInfo(signatureCertInfo: entry?.debugInformation, trustlistExpiration: expirationDate, trustlistDownloadedAt: lastUpdate, trustlistUrl: dataUrl, trustlistEntries: cachedData.entries.count, errors: errors)
     }
     
 }
