@@ -15,7 +15,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/CocoaLumberjack/CocoaLumberjack.git", .upToNextMajor(from: "3.7.0")),
-        .package(url: "https://github.com/ehn-dcc-development/ValidationCore", .branch("main"))
+        .package(url: "https://github.com/ehn-dcc-development/ValidationCore", .branch("feature/debug_version"))
     ],
     targets: [
         .target(
