@@ -126,19 +126,19 @@ class DefaultTrustlistService: SignedDataService<TrustList>, TrustlistService {
            let certNotBefore = entry?.notBefore,
            let certNotAfter = entry?.notAfter {
             
-            if certNotAfter.isAfter(dateService.now) {
+            if !certNotAfter.isAfter(dateService.now) {
                 errors.append(.PUBLIC_KEY_EXPIRED)
             }
             
-            if certNotBefore.isBefore(dateService.now) {
+            if !certNotBefore.isBefore(dateService.now) {
                 errors.append(.PUBLIC_KEY_NOT_YET_VALID)
             }
             
-            if cwtExpiresAt.isAfter(dateService.now) {
+            if !cwtExpiresAt.isAfter(dateService.now) {
                 errors.append(.CWT_EXPIRED)
             }
             
-            if cwtIssuedAt.isBefore(dateService.now) {
+            if !cwtIssuedAt.isBefore(dateService.now) {
                 errors.append(.CWT_NOT_YET_VALID)
             }
         }
